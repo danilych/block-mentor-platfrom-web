@@ -1,18 +1,49 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowDownUp } from 'lucide-react'
+import { useParams } from 'react-router-dom'
 import ParticleEffect from '@/components/Canvas'
 
-const networks = [
-  { id: 'arbitrum-sepolia', name: 'Arbitrum Sepolia', icon: '🔵' },
-  { id: 'base-sepolia', name: 'Base Sepolia', icon: '🔷' },
+interface NetworkInfo {
+  id: string
+  name: string
+  icon: string
+  balance?: string
+  isEnabled: boolean
+}
+
+const defaultNetworks: NetworkInfo[] = [
+  { id: 'arbitrum-sepolia', name: 'Arbitrum Sepolia', icon: '', isEnabled: true },
+  { id: 'base-sepolia', name: 'Base Sepolia', icon: '', isEnabled: true },
 ]
 
 const BridgePage = () => {
+  const { walletAddress } = useParams<{ walletAddress: string }>()
   const [amount, setAmount] = useState('')
   const [fromNetwork, setFromNetwork] = useState('')
   const [toNetwork, setToNetwork] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [networks, setNetworks] = useState<NetworkInfo[]>(defaultNetworks)
+
+  useEffect(() => {
+    const fetchWalletInfo = async () => {
+      if (!walletAddress) return
+
+      try {
+        //TODO: Replace with your actual backend API endpoint
+        const response = await fetch(`/api/wallet/${walletAddress}`)
+        const data = await response.json()
+        
+        // Update networks with balances and availability
+        setNetworks(data.networks || defaultNetworks)
+      } catch (error) {
+        console.error('Error fetching wallet info:', error)
+        setError('Failed to load wallet information')
+      }
+    }
+
+    fetchWalletInfo()
+  }, [walletAddress])
 
   const handleSwapNetworks = () => {
     if (fromNetwork && toNetwork) {
@@ -23,6 +54,10 @@ const BridgePage = () => {
   }
 
   const handleBridge = async () => {
+    if (!walletAddress) {
+      setError('Invalid wallet address')
+      return
+    }
     if (!fromNetwork || !toNetwork) {
       setError('Please select networks')
       return
@@ -32,16 +67,48 @@ const BridgePage = () => {
       return
     }
 
+    const selectedFromNetwork = networks.find(n => n.id === fromNetwork)
+    if (!selectedFromNetwork?.isEnabled) {
+      setError('Selected network is not available')
+      return
+    }
+
     try {
       setIsLoading(true)
       setError(null)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    } catch (error: Error | unknown) {
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError('Failed to bridge tokens. Please try again.')
+
+      // Replace with your actual backend API endpoint
+      const response = await fetch('/api/bridge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          walletAddress,
+          fromNetwork,
+          toNetwork,
+          amount,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Bridge request failed')
       }
+
+      const data = await response.json()
+      // Handle successful bridge response
+      console.log('Bridge successful:', data)
+      
+      // Refresh network information
+      const updatedNetworksResponse = await fetch(`/api/wallet/${walletAddress}/networks`)
+      const updatedNetworksData = await updatedNetworksResponse.json()
+      setNetworks(updatedNetworksData.networks || defaultNetworks)
+
+    } catch (error: unknown) {
+      console.error('Bridge error:', error)
+      setError(
+        error instanceof Error ? error.message : 'Failed to bridge tokens. Please try again.'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -63,7 +130,14 @@ const BridgePage = () => {
     <div className="w-full min-h-screen p-4 md:p-6 relative">
       <ParticleEffect />
       <div className="max-w-xl mx-auto relative">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Bridge Tokens</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bridge Tokens</h1>
+          {walletAddress && (
+            <div className="text-sm text-gray-600">
+              Wallet: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </div>
+          )}
+        </div>
 
         <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
           {error && (
@@ -88,20 +162,27 @@ const BridgePage = () => {
                       setFromNetwork(network.id)
                       setError(null)
                     }}
-                    disabled={network.id === toNetwork}
+                    disabled={network.id === toNetwork || !network.isEnabled}
                     className={`
                       flex items-center justify-center gap-2.5 p-4 rounded-lg border-2
-                      transition-all duration-200 font-medium backdrop-blur-sm
+                      transition-all duration-200 backdrop-blur-sm
                       ${
                         fromNetwork === network.id
                           ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
                           : 'border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-600'
                       }
-                      ${network.id === toNetwork ? 'opacity-50 cursor-not-allowed' : ''}
+                      ${(network.id === toNetwork || !network.isEnabled) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
                     <span className="text-xl">{network.icon}</span>
-                    <span>{network.name}</span>
+                    <div className="flex flex-col items-center">
+                      <span>{network.name}</span>
+                      {network.balance && (
+                        <span className="text-sm opacity-75">
+                          {network.balance} ETH
+                        </span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -140,20 +221,27 @@ const BridgePage = () => {
                       setToNetwork(network.id)
                       setError(null)
                     }}
-                    disabled={network.id === fromNetwork}
+                    disabled={network.id === fromNetwork || !network.isEnabled}
                     className={`
                       flex items-center justify-center gap-2.5 p-4 rounded-lg border-2
-                      transition-all duration-200 font-medium backdrop-blur-sm
+                      transition-all duration-200 backdrop-blur-sm
                       ${
                         toNetwork === network.id
                           ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
                           : 'border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-600'
                       }
-                      ${network.id === fromNetwork ? 'opacity-50 cursor-not-allowed' : ''}
+                      ${(network.id === fromNetwork || !network.isEnabled) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
                     <span className="text-xl">{network.icon}</span>
-                    <span>{network.name}</span>
+                    <div className="flex flex-col items-center">
+                      <span>{network.name}</span>
+                      {network.balance && (
+                        <span className="text-sm opacity-75">
+                          {network.balance} ETH
+                        </span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>

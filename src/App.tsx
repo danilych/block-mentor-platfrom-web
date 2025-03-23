@@ -1,12 +1,8 @@
-import BridgePage from "@/pages/bridge"
+import { RouterProvider } from 'react-router-dom'
+import { router } from './router'
 
 function App() {
-
-  return (
-    <>
-      <BridgePage />
-    </>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
