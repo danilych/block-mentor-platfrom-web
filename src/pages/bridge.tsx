@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowDownUp } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import ParticleEffect from '@/components/Canvas'
+import { networkIcons } from '@/assets'
 
 interface NetworkInfo {
   id: string
@@ -12,8 +13,8 @@ interface NetworkInfo {
 }
 
 const defaultNetworks: NetworkInfo[] = [
-  { id: 'arbitrum-sepolia', name: 'Arbitrum Sepolia', icon: '', isEnabled: true },
-  { id: 'base-sepolia', name: 'Base Sepolia', icon: '', isEnabled: true },
+  { id: 'arbitrum-sepolia', name: 'Arbitrum Sepolia', icon: networkIcons.arbitrumIcon, isEnabled: true },
+  { id: 'base-sepolia', name: 'Base Sepolia', icon: networkIcons.baseIcon, isEnabled: true },
 ]
 
 const BridgePage = () => {
@@ -174,7 +175,7 @@ const BridgePage = () => {
                       ${(network.id === toNetwork || !network.isEnabled) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    <span className="text-xl">{network.icon}</span>
+                    <img src={network.icon} alt={network.name} className="w-8 h-8 object-contain" />
                     <div className="flex flex-col items-center">
                       <span>{network.name}</span>
                       {network.balance && (
@@ -233,7 +234,7 @@ const BridgePage = () => {
                       ${(network.id === fromNetwork || !network.isEnabled) ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    <span className="text-xl">{network.icon}</span>
+                    <img src={network.icon} alt={network.name} className="w-8 h-8 object-contain" />
                     <div className="flex flex-col items-center">
                       <span>{network.name}</span>
                       {network.balance && (
