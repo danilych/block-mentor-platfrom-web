@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ArrowDownUp } from 'lucide-react'
+import ParticleEffect from '@/components/Canvas'
 
 const networks = [
   { id: 'arbitrum-sepolia', name: 'Arbitrum Sepolia', icon: '🔵' },
@@ -49,6 +50,7 @@ const BridgePage = () => {
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-white">
+        <ParticleEffect />
         <div className="flex items-center gap-3 text-lg text-gray-700">
           <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           Processing bridge transaction...
@@ -58,11 +60,12 @@ const BridgePage = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-white to-gray-50 p-4 md:p-6">
-      <div className="max-w-xl mx-auto">
+    <div className="w-full min-h-screen p-4 md:p-6 relative">
+      <ParticleEffect />
+      <div className="max-w-xl mx-auto relative">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Bridge Tokens</h1>
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
               {error}
@@ -88,7 +91,7 @@ const BridgePage = () => {
                     disabled={network.id === toNetwork}
                     className={`
                       flex items-center justify-center gap-2.5 p-4 rounded-lg border-2
-                      transition-all duration-200 font-medium
+                      transition-all duration-200 font-medium backdrop-blur-sm
                       ${
                         fromNetwork === network.id
                           ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
@@ -109,7 +112,7 @@ const BridgePage = () => {
                 onClick={handleSwapNetworks}
                 disabled={!fromNetwork || !toNetwork}
                 className={`
-                  p-2.5 rounded-full border-2 border-gray-200
+                  p-2.5 rounded-full border-2 border-gray-200 backdrop-blur-sm
                   transition-all duration-200
                   ${
                     fromNetwork && toNetwork
@@ -140,7 +143,7 @@ const BridgePage = () => {
                     disabled={network.id === fromNetwork}
                     className={`
                       flex items-center justify-center gap-2.5 p-4 rounded-lg border-2
-                      transition-all duration-200 font-medium
+                      transition-all duration-200 font-medium backdrop-blur-sm
                       ${
                         toNetwork === network.id
                           ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-[1.02]'
@@ -170,8 +173,8 @@ const BridgePage = () => {
                     setError(null)
                   }}
                   className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-900 
-                    placeholder-gray-400 transition-colors duration-200
-                    focus:outline-none focus:border-blue-400"
+                    placeholder-gray-400 transition-colors duration-200 backdrop-blur-sm
+                    focus:outline-none focus:border-blue-400 bg-white/50"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4">
                   <span className="text-gray-600 font-medium">ETH</span>
@@ -184,7 +187,7 @@ const BridgePage = () => {
               disabled={!fromNetwork || !toNetwork || !amount || isLoading}
               className={`
                 w-full py-3.5 px-4 rounded-lg font-medium text-base
-                transition-all duration-200
+                transition-all duration-200 backdrop-blur-sm
                 ${
                   !fromNetwork || !toNetwork || !amount || isLoading
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
