@@ -1,8 +1,10 @@
+import BridgePage from "@/pages/bridge"
+
 function App() {
 
   return (
     <>
-      <p>ETH Warsaw</p>
+      <BridgePage />
     </>
   )
 }
