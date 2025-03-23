@@ -18,7 +18,7 @@ const defaultNetworks: NetworkInfo[] = [
 ]
 
 const BridgePage = () => {
-  const { walletAddress } = useParams<{ walletAddress: string }>()
+  const { tokenAddress } = useParams<{ tokenAddress: string }>()
   const [amount, setAmount] = useState('')
   const [fromNetwork, setFromNetwork] = useState('')
   const [toNetwork, setToNetwork] = useState('')
@@ -28,11 +28,11 @@ const BridgePage = () => {
 
   useEffect(() => {
     const fetchWalletInfo = async () => {
-      if (!walletAddress) return
+      if (!tokenAddress) return
 
       try {
         //TODO: Replace with your actual backend API endpoint
-        const response = await fetch(`/api/wallet/${walletAddress}`)
+        const response = await fetch(`/api/wallet/${tokenAddress}`)
         const data = await response.json()
         
         // Update networks with balances and availability
@@ -44,7 +44,7 @@ const BridgePage = () => {
     }
 
     fetchWalletInfo()
-  }, [walletAddress])
+  }, [tokenAddress])
 
   const handleSwapNetworks = () => {
     if (fromNetwork && toNetwork) {
@@ -55,8 +55,8 @@ const BridgePage = () => {
   }
 
   const handleBridge = async () => {
-    if (!walletAddress) {
-      setError('Invalid wallet address')
+    if (!tokenAddress) {
+      setError('Invalid token address')
       return
     }
     if (!fromNetwork || !toNetwork) {
@@ -85,7 +85,7 @@ const BridgePage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          walletAddress,
+          tokenAddress,
           fromNetwork,
           toNetwork,
           amount,
@@ -101,7 +101,7 @@ const BridgePage = () => {
       console.log('Bridge successful:', data)
       
       // Refresh network information
-      const updatedNetworksResponse = await fetch(`/api/wallet/${walletAddress}/networks`)
+      const updatedNetworksResponse = await fetch(`/api/wallet/${tokenAddress}/networks`)
       const updatedNetworksData = await updatedNetworksResponse.json()
       setNetworks(updatedNetworksData.networks || defaultNetworks)
 
@@ -133,9 +133,9 @@ const BridgePage = () => {
       <div className="max-w-xl mx-auto relative">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bridge Tokens</h1>
-          {walletAddress && (
+          {tokenAddress && (
             <div className="text-sm text-gray-600">
-              Wallet: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              Token address: {tokenAddress.slice(0, 6)}...{tokenAddress.slice(-4)}
             </div>
           )}
         </div>
