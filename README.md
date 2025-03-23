@@ -20,7 +20,7 @@ A specialized cross-chain bridge application that enables seamless token transfe
 Block Mentor Platform Bridge is a dedicated web application designed to facilitate cross-chain token transfers with a focus on security, usability, and real-time transaction tracking. It currently supports bridging between Arbitrum Sepolia and Base Sepolia networks.
 
 <p align="center">
-  <img src="./src/assets/logo.ico" alt="Block Mentor Platform" width="80%" />
+  <img src="./src/assets/logo.ico" alt="Block Mentor Platform" width="240" />
 </p>
 
 ## Features
